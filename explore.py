@@ -8,13 +8,15 @@ import time
 import re
 
 base_url = 'https://prod-ssb-01.dccc.edu/PROD/bwckschd.p_disp_dyn_sched'
+courses_link = re.compile('^https://prod-ssb-01.dccc.edu/PROD/bwckschd.p_disp_detail_sched?term_in=202101&crn_in')
 
 
 class Sourcing:
     def run(self):
         self.open_link()
         self.get_subject_list()
-        self.loop_through_subjects()
+        self.loop_subject_list()
+        # self.get_the_title()
 
     def open_link(self):
         self.driver = webdriver.Chrome('chromedriver.exe')
@@ -27,28 +29,40 @@ class Sourcing:
 
     def get_subject_list(self):
         self.subjects_block = self.driver.find_element_by_name('sel_subj')
-
         self.subjects = self.subjects_block.find_elements_by_xpath('/html/body/div[4]/form/table[1]/tbody/tr/td['
                                                                    '2]/select/option')
-        ''' self.subject_list = []
-        for subject in self.subjects:
-            self.subject_name = subject.get_attribute('innerHTML')
-            self.subject_list.append(self.subject_name)
+        # subjects is a list
+        # print(self.subjects[70].text)
 
-        print(self.subject_list)
-            '''
+        #some repetition here subjects == subject_list
 
-    def loop_through_subjects(self, ):
-        self.subject_list = []
+        self.subjects_list = []
         for subject in self.subjects:
-            self.subject_name = subject.get_attribute('innerHTML')
-            # moving append here selects all subjects
-            # self.subject_list.append(self.subject_name)
-            subject.click()
+            try:
+                subject_name = subject.text.split(')')[1]
+                if ')' == subject_name[-1]:
+                    subject_name = subject_name
+
+            except:
+                subject_name = subject.text.split(']')[1]
+            self.subjects_list.append(subject_name)
+
+
+    def loop_subject_list(self,):
+
+        for classs in self.subjects:
+            classs.click()
             class_search = self.driver.find_element_by_xpath('/html/body/div[4]/form/input[12]')
             class_search.click()
 
-    def get_the_title(self):
+            pass
+
+        #print(subjects_list)
+
+    def loop_through_subjects(self, ):
+        pass
+
+    def get_the_title(self, ):
         # get title, name of lec and schedule type, email
         pass
 
