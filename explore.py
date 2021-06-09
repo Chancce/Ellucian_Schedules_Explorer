@@ -9,7 +9,6 @@ import re
 
 base_url = 'https://prod-ssb-01.dccc.edu/PROD/bwckschd.p_disp_dyn_sched'
 
-
 courses_link = re.compile(r'^https://prod-ssb-01.dccc.edu/PROD/bwckschd.p_disp_detail_sched?term_in=202101&crn_in=')
 
 
@@ -17,7 +16,8 @@ class Sourcing:
     def run(self):
         self.open_link()
         self.get_subject_list()
-        self.get_the_title()
+        self.get_the_title_email_name()
+
         self.driver.quit()
 
     def open_link(self):
@@ -54,45 +54,39 @@ class Sourcing:
         class_search = self.driver.find_element_by_xpath('/html/body/div[4]/form/input[12]')
         class_search.click()
 
-    def get_the_title(self, ):
+    def get_the_title_email_name(self, ):
 
         # get title, name of lec and schedule type, email
         self.clean_links = []
         titles = []
         instructor_names = []
+        instructor_emails = []
         malink = self.driver.find_elements_by_xpath("//a[@href]")
         # grab all links
         title_link = []
 
         for unclean_link in malink:
             urls = unclean_link.get_attribute("href")
-            if re.match(courses_link, urls) :
+            if re.match(courses_link, urls):
                 title = unclean_link.text
                 titles.append(title)
                 self.clean_links.append(urls)
+                mail_to = self.driver.find_elements_by_xpath("a[href^=mailto]")
+                email = mail_to.get_attribute('href')
         print(titles)
 
-    def get_the_class_capacity(self, ):
+    def get_the_class_capacity_and_type(self, ):
         class_capacity = []
+        class_types = []
         for url in self.clean_links:
             self.driver.get(url)
             # time.sleep()
 
             class_cap = self.driver.find_element_by_xpath(
-                '/html[1]/body[1]/div[4]/table[1]/tbody[1]/tr[2]/td[1]/table[1]/tbody[1]/tr[2]/td[1]').text
-
+                '/html/body/div[4]/table[1]/tbody/tr[2]/td/table[1]/tbody/tr[2]/td[1]').text
             class_capacity.append(class_cap)
-
-        # get title, name of lec, schedule type, email
-        # grab all links
-
-    """def loop_through_subjects(self, ):
-        pass"""
-
-    def get_the_class_cap(self):
-        # get the class capacity
-
-        pass
+            class_type = self.driver.find_element_by_xpath('/html/body/div[4]/table[1]/tbody/tr[2]/td/text()[4]').text
+            class_types.append(class_type)
 
     def add_to_xlsx(self):
         pass
